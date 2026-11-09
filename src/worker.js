@@ -14,7 +14,11 @@ export default {
       );
     }
 
-    // Validate incoming SMS
+    // Validate incoming SMS.
+    // NOTE: no headers are required — this endpoint is header-optional by design.
+    // - Content-Type: the body is parsed as JSON regardless of the declared
+    //   content type, so this header can be omitted entirely.
+    // - User-agent: never read; purely informational client branding.
     let data;
 
     try {

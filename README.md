@@ -6,18 +6,22 @@ WhatsApp message from the connected agent to its creator, via Meta's
 
 This repo was validated locally with `wrangler dev` — not deployed yet.
 
-## Request contract
+## Request contract — all headers optional
 
 ```
-POST /
-Authorization: Bearer <WEBHOOK_SECRET>
-Content-Type: application/json
-
+POST https://sms-forwarder.hanzlaahmad100.workers.dev/
 {"sender": "+9203000000000", "message": "SMS body (<=10000 chars)"}
 ```
 
+- A bare POST with just the JSON body works — no `Authorization`, no
+  `Content-Type`, no `User-agent` required (the body is parsed as JSON
+  whatever the declared content type).
+- Optional headers your app may send (ignored or informational):
+  - `Content-Type: application/json` — correct HTTP semantics, not enforced
+  - `User-agent: SMS Forwarder App` — app self-identification, never read
+
 Responses: `200` forwarded (`stage: accepted_by_whatsapp`) · `400` invalid input ·
-`401` bad secret · `405` wrong method · `502` WhatsApp API error (body includes
+`405` wrong method · `502` WhatsApp API error (body includes
 upstream status, e.g. 403/131005 wrong agent, 429 rate limit).
 
 Every accepted request sends **exactly one** WhatsApp message; there are no
@@ -35,7 +39,6 @@ curl http://localhost:8787/
 
 # forward test (one real WhatsApp message)
 curl -X POST http://localhost:8787/ \
-  -H 'Authorization: Bearer <WEBHOOK_SECRET>' \
   -H 'Content-Type: application/json' \
   -d '{"sender":"+9203000000000","message":"Hello from the worker"}'
 ```
@@ -47,7 +50,6 @@ Local secrets live in `.dev.vars` (git-ignored). In production set them with
 
 | Secret                   | Meaning                                                            |
 |--------------------------|--------------------------------------------------------------------|
-| `WEBHOOK_SECRET`         | Bearer secret the Android forwarder must present                   |
 | `WHATSAPP_AGENT_API_KEY` | Agent API key (WhatsApp → Settings → Agents → Chat info → API key) |
 | `WHATSAPP_RECIPIENT_ID`  | `user:<id>` of the agent's owner — **must belong to the same agent as the key**, else 403/code 131005 |
 
@@ -65,7 +67,6 @@ does exactly this.
 
 ```bash
 npx wrangler deploy
-npx wrangler secret put WEBHOOK_SECRET
 npx wrangler secret put WHATSAPP_AGENT_API_KEY
 npx wrangler secret put WHATSAPP_RECIPIENT_ID
 ```

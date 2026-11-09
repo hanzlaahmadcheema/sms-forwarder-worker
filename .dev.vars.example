@@ -1,7 +1,5 @@
 # Local secrets template — copy to .dev.vars and fill in. .dev.vars is git-ignored.
 
-WEBHOOK_SECRET=
-
 # WhatsApp Agent Platform
 WHATSAPP_AGENT_API_KEY=
 WHATSAPP_RECIPIENT_ID=
